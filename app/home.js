@@ -5,7 +5,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Bem-vindo ao App de Livros</Text>
-      <Text>Biblioteca</Text>
+      <Text>SISTEMA DE CADASTRO</Text>
     </View>
   );
 };

@@ -1,93 +1,66 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity } from 'react-native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import Ionicons from "react-native-vector-icons/Ionicons";
+import React, { useState } from "react";
+import {
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Alert,
+  SafeAreaView,
+  Button,
+} from "react-native";
+import Mytext from "../componentes/Mytext";
+import Mytextinput from "../componentes/Mytextinput";
+import Mybutton from "../componentes/Mybutton";
+import { db } from "../firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
 
-const LivroScreen = ({ navigation }) => {
-  const [consulta, setConsulta] = useState('');
-  const [livros, setLivros] = useState([
-    { id: 1, titulo: 'PHP', autor: 'Pedro', editora: 'Editora A', genero: 'Romance' },
-    { id: 2, titulo: 'React', autor: 'Ricardo', editora: 'Editora B', genero: 'Ficção' },
-    { id: 3, titulo: 'Java', autor: 'Carol', editora: 'Editora C', genero: 'Aventura' },
-    { id: 4, titulo: 'Código Limpo', autor: 'Naty', editora: 'Editora D', genero: 'Drama' },
-    { id: 5, titulo: 'Programador', autor: 'Thiago', editora: 'Editora E', genero: 'Suspense' },
-  ]);
+const TelaLivro = ({ navigation }) => {
+  const [livro, setLivro] = useState("");
+  const [id_livro, setId_livro] = useState("");
 
-  const livrosFiltrados = livros.filter(livro =>
-    livro.titulo.toLowerCase().includes(consulta.toLowerCase()) ||
-    livro.autor.toLowerCase().includes(consulta.toLowerCase())
-  );
-
+  async function inserirGenero() {
+    try {
+      const docRef = await addDoc(collection(db, "Livro"), {
+        livro: livro,
+      });
+      Alert.alert("Informação", "Livro cadastrado com sucesso!");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Atenção", "Erro ao cadastrar livro!");
+    }
+  }
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.openDrawer()}>
-          <Ionicons name="menu" size={30} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.titulo}>Livros</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: "white" }}>
+        <View style={{ flex: 1 }}>
+          <ScrollView keyboardShouldPersistTaps="handled">
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={{ flex: 1, justifyContent: "space-between" }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 10,
+                }}
+              >
+                <Mytextinput
+                  placeholder="Nome do livro"
+                  style={{ flex: 1, marginRight: 10, width:250, padding: 10 }}
+                  value={genero}
+                  onChangeText={setGenero}
+                />
+                <View style={{ width: 40 }}>
+                  <Button title="+" onPress={inserirLivro} />
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </ScrollView>
+        </View>
       </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Buscar livro..."
-        value={consulta}
-        onChangeText={setConsulta}
-      />
-
-      <ScrollView style={styles.lista}>
-        {livrosFiltrados.map(livro => (
-          <TouchableOpacity key={livro.id} style={styles.item}>
-            <Text style={styles.itemTitulo}>{livro.titulo}</Text>
-            <Text>Autor: {livro.autor}</Text>
-            <Text>Editora: {livro.editora}</Text>
-            <Text>Gênero: {livro.genero}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 20,
-  },
-  input: {
-    width:"90%",
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-  },
-  lista: {
-    flex: 1,
-  },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  itemTitulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
-
-export default LivroScreen;
+export default TelaLivro;
