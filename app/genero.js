@@ -5,17 +5,19 @@ import {
   KeyboardAvoidingView,
   Alert,
   SafeAreaView,
-  Button,
+  TouchableOpacity,
+  Text,
+  FlatList,
+  StyleSheet,
 } from "react-native";
-import Mytext from "../componentes/Mytext";
 import Mytextinput from "../componentes/Mytextinput";
-import Mybutton from "../componentes/Mybutton";
 import { db } from "../firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const TelaGenero = ({ navigation }) => {
   const [genero, setGenero] = useState("");
-  const [id_genero, setId_genero] = useState("");
+  const [listaGenero, setListaGenero] = useState([]);
 
   async function inserirGenero() {
     try {
@@ -26,6 +28,23 @@ const TelaGenero = ({ navigation }) => {
     } catch (error) {
       console.log(error);
       Alert.alert("Atenção", "Erro ao cadastrar gênero!");
+    }
+  }
+  async function consultarGenero() {
+    try {
+      if (!genero) {
+        Alert.alert("Atenção", "Digite um gênero para buscar");
+        return;
+      }
+      const colecao = collection(db, "Genero");
+      const q = query(colecao, where("genero", "==", genero));
+      const generos = await getDocs(q);
+      const lista = generos.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setListaGenero(lista);
+      console.log(listaGenero);
+    } catch (error) {
+      Alert.alert("Atenção", "Erro ao buscar gênero");
+      console.log(error);
     }
   }
   return (
@@ -46,21 +65,55 @@ const TelaGenero = ({ navigation }) => {
                 }}
               >
                 <Mytextinput
-                  placeholder="Nome do editora"
-                  style={{ flex: 1, marginRight: 10, width:250, padding: 10 }}
+                  placeholder="Nome do gênero"
+                  style={{ flex: 1, marginRight: 10, width: 250, padding: 10 }}
                   value={genero}
                   onChangeText={setGenero}
                 />
-                <View style={{ width: 40 }}>
-                  <Button title="+" onPress={inserirGenero} />
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <TouchableOpacity onPress={consultarGenero}>
+                    <AntDesign name="search1" size={24} color="black" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={inserirGenero}>
+                    <AntDesign name="adduser" size={24} color="black" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </KeyboardAvoidingView>
+            <View style={{ flex: 1 }}>
+              <FlatList
+                style={{ marginTop: 30 }}
+                contentContainerStyle={{ paddingHorizontal: 20 }}
+                data={listaGenero}
+                renderItem={({ item }) => (
+                  <View style={styles.flatList}>
+                    <Text> ID: {item.id}</Text>
+                    <Text> Nome: {item.genero}</Text>
+                  </View>
+                )}
+              />
+            </View>
           </ScrollView>
         </View>
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  flatList: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    marginVertical: 5,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+});
 
 export default TelaGenero;

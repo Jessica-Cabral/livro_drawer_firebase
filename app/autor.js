@@ -5,20 +5,21 @@ import {
   KeyboardAvoidingView,
   Alert,
   SafeAreaView,
-  Button,
+  FlatList,
   TouchableOpacity,
+  StyleSheet,
+  Text,
 } from "react-native";
 import Mytext from "../componentes/Mytext";
 import Mytextinput from "../componentes/Mytextinput";
 import MyButton from "../componentes/Mybutton";
 import { db } from "../firebaseConfig";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
 
 const TelaAutor = ({ navigation }) => {
   const [autor, setAutor] = useState("");
-  const [id_autor, setId_autor] = useState("");
+  const [listaAutores, setListaAutores] = useState ([]);
 
   async function inserirAutor() {
     try {
@@ -33,7 +34,7 @@ const TelaAutor = ({ navigation }) => {
   }
 
   async function consultarAutor() {
-    try {
+     try {
       const colecao = collection(db, "Autor");
       const q = query(colecao, where("nome", "==", autor));
       const autores = await getDocs(q);
@@ -41,7 +42,6 @@ const TelaAutor = ({ navigation }) => {
       setListaAutores(lista);
       console.log(listaAutores);
     } catch (error) {
-      add - c;
       Alert.alert("Atenção", "Erro ao Buscar autor");
     }
   }
@@ -78,11 +78,41 @@ const TelaAutor = ({ navigation }) => {
                 </View>
               </View>
             </KeyboardAvoidingView>
+            <View style={{ flex: 1 }}>
+                <FlatList
+                  style={{ marginTop: 30 }}
+                  contentContainerStyle={{ paddingHorizontal: 20 }}
+                  data={listaAutores}
+                  renderItem={({item})=>(
+                    <View style={styles.flatList}>
+                      <Text> ID: {item.id}</Text>
+                      <Text> Nome: {item.nome}</Text>
+                    </View>
+
+                  )}
+                />
+          </View>
           </ScrollView>
+          
         </View>
       </View>
     </SafeAreaView>
   );
 };
 
+const styles = StyleSheet.create({
+  flatList: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    marginVertical: 5,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+});
 export default TelaAutor;
