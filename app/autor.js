@@ -6,12 +6,15 @@ import {
   Alert,
   SafeAreaView,
   Button,
+  TouchableOpacity,
 } from "react-native";
 import Mytext from "../componentes/Mytext";
 import Mytextinput from "../componentes/Mytextinput";
-import Mybutton from "../componentes/Mybutton";
+import MyButton from "../componentes/Mybutton";
 import { db } from "../firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const TelaAutor = ({ navigation }) => {
   const [autor, setAutor] = useState("");
@@ -26,6 +29,20 @@ const TelaAutor = ({ navigation }) => {
     } catch (error) {
       console.log(error);
       Alert.alert("Atenção", "Erro ao cadastrar autor!");
+    }
+  }
+
+  async function consultarAutor() {
+    try {
+      const colecao = collection(db, "Autor");
+      const q = query(colecao, where("nome", "==", autor));
+      const autores = await getDocs(q);
+      const lista = autores.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setListaAutores(lista);
+      console.log(listaAutores);
+    } catch (error) {
+      add - c;
+      Alert.alert("Atenção", "Erro ao Buscar autor");
     }
   }
   return (
@@ -47,12 +64,17 @@ const TelaAutor = ({ navigation }) => {
               >
                 <Mytextinput
                   placeholder="Nome do autor"
-                  style={{ flex: 1, marginRight: 10, width:250, padding: 10 }}
+                  style={{ flex: 1, marginRight: 10, width: 250, padding: 10 }}
                   value={autor}
                   onChangeText={setAutor}
                 />
-                <View style={{ width: 40 }}>
-                  <Button title="+" onPress={inserirAutor} />
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <TouchableOpacity onPress={consultarAutor}>
+                    <AntDesign name="search1" size={24} color="black" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={inserirAutor}>
+                    <AntDesign name="adduser" size={24} color="black" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </KeyboardAvoidingView>
